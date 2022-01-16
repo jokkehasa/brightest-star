@@ -3,6 +3,18 @@ import './App.css';
 import { useState, useEffect } from 'react';
 
 function App() {
+  const [location, setLocation] = useState(null);
+  const [time, setTime] = useState(null); 
+
+  const updateCoordinates = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(setLocation);
+    } else {
+      console.log("Geolocation not supported")
+    }
+    setTime(new Date());
+  };
+
   return (
     <div className="App">
       <header className="App-header">
