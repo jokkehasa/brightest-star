@@ -1,5 +1,4 @@
-import logo from './logo.svg';
-import './App.css';
+import { Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import SkyDirections from './components/SkyDirections';
 
@@ -23,44 +22,36 @@ function App() {
       setDirection([...direction, toggled]);
     } else {
       setDirection([...direction.slice(0, index),
-                    ...direction.slice(index + 1)]);
+      ...direction.slice(index + 1)]);
     }
   };
 
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-      <div>
-        <table><tbody>
-          <tr><td>Latitude:</td>
-              <td>{location && location.coords.latitude}</td></tr>
-          <tr><td>Longitude:</td>
-              <td>{location && location.coords.longitude}</td></tr>
-          <tr><td>Time:</td>
-              <td>{time && time.toString()}</td></tr>
-        </tbody></table>
-      </div>
-      <button type="button" onClick={updateCoordinates}>
+    <Container maxWidth="sm">
+      <TableContainer component={Paper}>
+        <Table>
+          <TableBody>
+            <TableRow>
+              <TableCell>Latitude: </TableCell>
+              <TableCell>{location && location.coords.latitude}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Longitude: </TableCell>
+              <TableCell>{location && location.coords.longitude}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Time: </TableCell>
+              <TableCell>{time && time.toString()}</TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
+      <Button variant="contained"  style={{marginBottom:50, marginTop:50}} onClick={updateCoordinates}>
         Update location and time
-      </button>
-      <div>
-        <p>Viewing directions: {direction.toString()}</p>
-      </div>
+      </Button>
+      <Typography>Viewing directions: {direction.toString()}</Typography>
       <SkyDirections handleClick={toggleDirection} />
-    </div>
+    </Container>
   );
 }
 
