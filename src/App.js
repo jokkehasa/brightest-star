@@ -1,6 +1,7 @@
 import { Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import SkyDirections from './components/SkyDirections';
+import SkyView from './components/SkyView';
 
 function App() {
   const [location, setLocation] = useState(null);
@@ -51,6 +52,7 @@ function App() {
       </Button>
       <Typography>Viewing directions: {direction.toString()}</Typography>
       <SkyDirections handleClick={toggleDirection} />
+      <SkyView />
     </Container>
   );
 }
