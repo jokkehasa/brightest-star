@@ -3,7 +3,7 @@ import { Button, Typography } from "@mui/material";
 
 function GetBrightest(props) {
 
-    const [kirkkain, setKirkkain] = useState();
+    const [brightest, setBrightest] = useState();
 
     const brightestStarName = () => {
         let tempStarIdx = null;
@@ -14,13 +14,13 @@ function GetBrightest(props) {
                 MAGvalue=props.starData[i].mag;
             }
         }
-        setKirkkain(props.starData[tempStarIdx].proper);
+        setBrightest(props.starData[tempStarIdx].proper);
     }
 
     return (
         <div>
-            <Button variant="contained" sx={{ mb: 2, mt: 2 }} onClick={brightestStarName}>Näytä kirkkain tähti</Button>
-            <Typography sx={{ mb: 2, mt: 2 }}>{`Kirkkain tähti on: ${kirkkain}`}</Typography>
+            <Button variant="contained" sx={{ mb: 2, mt: 2 }} onClick={brightestStarName}>Show Brightest star</Button>
+            <Typography sx={{ mb: 2, mt: 2 }}>{`Brightest star is: ${brightest}`}</Typography>
         </div>
     );
 }
