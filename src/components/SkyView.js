@@ -29,14 +29,25 @@ function SkyView() {
   const [objects, setObjects] = useState(generateObjects());
   const [direction, setDirection] = useState({
     az: 0,
-    alt: 15,
+    alt: 0,
   });
 
+  const deg = (rad) => Math.PI / 180 * rad;
+  const D = 700;  /* Screen distance in pix */
+
   const translate = (obj) => {
-   /* Tää ei vielä toimi */
+   /* No rotation yet (z -> viewing direction)*/
+      const phi = obj.az;
+      const theta = 90 - obj.alt;
+   /* Projection */
+      const r = D * Math.tan(deg(theta));
+      const r1 = r * Math.cos(deg(theta));
+      const xi = r1 * Math.cos(Math.PI / 180 * phi);
+      const upsilon = r1 * Math.sin(Math.PI / 180 * phi);
+   /* Translate to screen coordinates and return */
     return ({
-      x: window.innerWidth / 2 + 1000 * Math.sin(Math.PI / 180 * (obj.alt - direction.alt)) * Math.cos(Math.PI / 180 * (obj.az - direction.az)),
-      y: window.innerHeight / 2 - 1000 * Math.sin(Math.PI / 180 * (obj.alt - direction.alt)) * Math.sin(Math.PI / 180 * (obj.alt - direction.alt)),
+      x: xi + window.innerWidth / 2,
+      y: -upsilon + window.innerHeight / 2,
     });
   }
 
