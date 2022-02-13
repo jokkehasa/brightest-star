@@ -1,5 +1,18 @@
 import { useState } from 'react';
-import { Stage, Layer, Star, Text } from 'react-konva';
+import { Stage, Layer, Star, Text, Circle, Rect } from 'react-konva';
+
+function generateObjects() {
+  const coords = Array(12*9);
+  for (var i = 0; i<9; i++)
+    for (var j = 0; j<12; j++)
+      coords[i*12 + j] = {
+        id: (i*12 + j).toString(),
+        alt: i*10,
+        az: j*30,
+        mag: Math.floor(Math.sqrt(Math.random()) * 6),
+      }
+  return coords;
+}
 
 function generateShapes() {
   return [...Array(10)].map((_, i) => ({
@@ -13,6 +26,19 @@ function generateShapes() {
 
 function SkyView() {
   const [stars, setStars] = useState(generateShapes());
+  const [objects, setObjects] = useState(generateObjects());
+  const [direction, setDirection] = useState({
+    az: 0,
+    alt: 15,
+  });
+
+  const translate = (obj) => {
+   /* Tää ei vielä toimi */
+    return ({
+      x: window.innerWidth / 2 + 1000 * Math.sin(Math.PI / 180 * (obj.alt - direction.alt)) * Math.cos(Math.PI / 180 * (obj.az - direction.az)),
+      y: window.innerHeight / 2 - 1000 * Math.sin(Math.PI / 180 * (obj.alt - direction.alt)) * Math.sin(Math.PI / 180 * (obj.alt - direction.alt)),
+    });
+  }
 
   const handleDragStart = (e) => {
     const id = e.target.id();
@@ -39,7 +65,24 @@ function SkyView() {
   return (
     <Stage width={window.innerWidth} height={window.innerHeight}>
       <Layer>
+      <Rect
+        x={0}
+        y={0}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        fill={"black"}
+      />
         <Text text="Try to drag a star" />
+        {objects.map((obj) => (
+          <Circle
+            key={obj.id}
+            id={obj.id}
+            x={translate(obj).x}
+            y={translate(obj).y}
+            radius={6 - obj.mag}
+            fill={"white"}
+          />
+        ))}
         {stars.map((star) => (
           <Star
             key={star.id}
