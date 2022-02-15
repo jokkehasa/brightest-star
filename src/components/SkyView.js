@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { Stage, Layer, Star, Text, Circle, Rect } from 'react-konva';
+/*import { Stage, Layer, Star, Text, Circle, Rect } from 'react-konva';*/
+import { Canvas } from '@react-three/fiber';
+import {BackSide } from 'three';
 
 function generateObjects() {
   const coords = Array(12*9);
@@ -74,7 +76,25 @@ function SkyView() {
   };
 
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight}>
+
+    <Canvas>
+      <mesh>
+        <sphereBufferGeometry attach="geometry" args={[10,10,5]} />
+        <meshStandardMaterial
+          attach="material"
+          color={"black"}
+          emissive={0x100030}
+          side={BackSide}
+        />
+      </mesh>
+      <mesh rotation={[0.5,0.5,0]}>
+        <boxBufferGeometry attach="geometry" args={[1.5, 1.5, 1.5]}/>
+        <meshStandardMaterial attach="material" color={0xf95b3c} />
+      </mesh>
+      <pointLight intensity={1.0} position={[4,5,3]} />
+    </Canvas>
+
+/*    <Stage width={window.innerWidth} height={window.innerHeight}>
       <Layer>
       <Rect
         x={0}
@@ -119,7 +139,7 @@ function SkyView() {
           />
         ))}
       </Layer>
-    </Stage>
+    </Stage>*/
   );
 }
 
