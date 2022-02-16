@@ -1,7 +1,11 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 /*import { Stage, Layer, Star, Text, Circle, Rect } from 'react-konva';*/
-import { Canvas } from '@react-three/fiber';
-import {BackSide } from 'three';
+import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
+import { BackSide } from 'three';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+
+// Extend will make OrbitControls available as a JSX element called orbitControls for us to use.
+extend({ OrbitControls });
 
 function generateObjects() {
   const coords = Array(12*9);
@@ -25,6 +29,20 @@ function generateShapes() {
     isDragging: false,
   }));
 }
+
+const CameraControls = () => {
+  // Get a reference to the Three.js Camera, and the canvas html element.
+  // We need these to setup the OrbitControls component.
+  // https://threejs.org/docs/#examples/en/controls/OrbitControls
+  const {
+    camera,
+    gl: { domElement },
+  } = useThree();
+  // Ref to the controls, so that we can update them on every frame using useFrame
+  const controls = useRef();
+  useFrame((state) => controls.current.update());
+  return <orbitControls ref={controls} args={[camera, domElement]} />;
+};
 
 function SkyView() {
   const [stars, setStars] = useState(generateShapes());
@@ -76,8 +94,12 @@ function SkyView() {
   };
 
   return (
-
-    <Canvas>
+    <Canvas style={{width: 800, height: 600, background: "black"}}>
+      <CameraControls />
+      <mesh rotation={[0.5,0.5,0]}>
+        <boxBufferGeometry attach="geometry" args={[1.5, 1.5, 1.5]}/>
+        <meshStandardMaterial attach="material" color={0xf95b3c} />
+      </mesh>
       <mesh>
         <sphereBufferGeometry attach="geometry" args={[10,10,5]} />
         <meshStandardMaterial
@@ -87,12 +109,11 @@ function SkyView() {
           side={BackSide}
         />
       </mesh>
-      <mesh rotation={[0.5,0.5,0]}>
-        <boxBufferGeometry attach="geometry" args={[1.5, 1.5, 1.5]}/>
-        <meshStandardMaterial attach="material" color={0xf95b3c} />
-      </mesh>
       <pointLight intensity={1.0} position={[4,5,3]} />
+      <pointLight intensity={0.2} position={[-4,-4,-4]} />
     </Canvas>
+
+
 
 /*    <Stage width={window.innerWidth} height={window.innerHeight}>
       <Layer>
