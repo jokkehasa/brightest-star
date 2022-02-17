@@ -41,7 +41,12 @@ const CameraControls = () => {
   // Ref to the controls, so that we can update them on every frame using useFrame
   const controls = useRef();
   useFrame((state) => controls.current.update());
-  return <orbitControls ref={controls} args={[camera, domElement]} />;
+  return <orbitControls
+          ref={controls}
+          args={[camera, domElement]}
+          enableZoom={false}
+          target={[ 0, 5, 0 ]}
+          position={[ 0, 5, 5 ]} />;
 };
 
 function SkyView() {
@@ -52,7 +57,7 @@ function SkyView() {
     alt: 0,
   });
 
-  const deg = (rad) => Math.PI / 180 * rad;
+  const rad = (deg) => Math.PI / 180 * deg;
   const D = 700;  /* Screen distance in pix */
 
   const translate = (obj) => {
@@ -60,10 +65,10 @@ function SkyView() {
       const phi = obj.az;
       const theta = 90 - obj.alt;
    /* Projection */
-      const r = D * Math.tan(deg(theta));
-      const r1 = r * Math.cos(deg(theta));
-      const xi = r1 * Math.cos(Math.PI / 180 * phi);
-      const upsilon = r1 * Math.sin(Math.PI / 180 * phi);
+      const r = D * Math.tan(rad(theta));
+      const r1 = r * Math.cos(rad(theta));
+      const xi = r1 * Math.cos(rad(phi));
+      const upsilon = r1 * Math.sin(rad(phi));
    /* Translate to screen coordinates and return */
     return ({
       x: xi + window.innerWidth / 2,
@@ -94,21 +99,53 @@ function SkyView() {
   };
 
   return (
-    <Canvas style={{width: 800, height: 600, background: "black"}}>
+    <Canvas style={{width: 1000, height: 600, background: "black"}} camera={{ far: 1100 }}>
       <CameraControls />
-      <mesh rotation={[0.5,0.5,0]}>
+      <mesh>
         <boxBufferGeometry attach="geometry" args={[1.5, 1.5, 1.5]}/>
         <meshStandardMaterial attach="material" color={0xf95b3c} />
       </mesh>
       <mesh>
-        <sphereBufferGeometry attach="geometry" args={[10,10,5]} />
+        <sphereBufferGeometry
+          attach="geometry"
+          args={[ 1000, 100, 50 ]}
+        />
         <meshStandardMaterial
           attach="material"
-          color={"black"}
+          color="black"
           emissive={0x100030}
           side={BackSide}
         />
       </mesh>
+      <mesh rotation={[ -Math.PI/2, 0, 0 ]}>
+        <circleBufferGeometry
+          attach="geometry"
+          args={[ 1000, 100 ]}
+        />
+        <meshStandardMaterial
+          attach="material"
+          color={0x442211}
+        />
+      </mesh>
+      {objects.map(({ id, alt, az, mag }) => (
+        <mesh
+          key={id}
+          position={[
+            900*Math.cos(rad(alt))*Math.cos(rad(az)),
+            900*Math.sin(rad(alt)),
+            900*Math.cos(rad(alt))*Math.sin(rad(az))
+          ]}
+        >
+          <sphereBufferGeometry
+            attach="geometry"
+            args={[ mag, 4, 2 ]}
+          />
+          <meshBasicMaterial
+            attach="material"
+            color="white"
+          />
+        </mesh>
+      ))}
       <pointLight intensity={1.0} position={[4,5,3]} />
       <pointLight intensity={0.2} position={[-4,-4,-4]} />
     </Canvas>
