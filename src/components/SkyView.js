@@ -1,5 +1,18 @@
 import { useState } from 'react';
-import { Stage, Layer, Star, Text } from 'react-konva';
+import { Stage, Layer, Star, Text, Circle, Rect } from 'react-konva';
+
+function generateObjects() {
+  const coords = Array(12*9);
+  for (var i = 0; i<9; i++)
+    for (var j = 0; j<12; j++)
+      coords[i*12 + j] = {
+        id: (i*12 + j).toString(),
+        alt: i*10,
+        az: j*30,
+        mag: Math.floor(Math.sqrt(Math.random()) * 6),
+      }
+  return coords;
+}
 
 function generateShapes() {
   return [...Array(10)].map((_, i) => ({
@@ -13,6 +26,30 @@ function generateShapes() {
 
 function SkyView() {
   const [stars, setStars] = useState(generateShapes());
+  const [objects, setObjects] = useState(generateObjects());
+  const [direction, setDirection] = useState({
+    az: 0,
+    alt: 0,
+  });
+
+  const deg = (rad) => Math.PI / 180 * rad;
+  const D = 700;  /* Screen distance in pix */
+
+  const translate = (obj) => {
+   /* No rotation yet (z -> viewing direction)*/
+      const phi = obj.az;
+      const theta = 90 - obj.alt;
+   /* Projection */
+      const r = D * Math.tan(deg(theta));
+      const r1 = r * Math.cos(deg(theta));
+      const xi = r1 * Math.cos(Math.PI / 180 * phi);
+      const upsilon = r1 * Math.sin(Math.PI / 180 * phi);
+   /* Translate to screen coordinates and return */
+    return ({
+      x: xi + window.innerWidth / 2,
+      y: -upsilon + window.innerHeight / 2,
+    });
+  }
 
   const handleDragStart = (e) => {
     const id = e.target.id();
@@ -39,7 +76,24 @@ function SkyView() {
   return (
     <Stage width={window.innerWidth} height={window.innerHeight}>
       <Layer>
+      <Rect
+        x={0}
+        y={0}
+        width={window.innerWidth}
+        height={window.innerHeight}
+        fill={"black"}
+      />
         <Text text="Try to drag a star" />
+        {objects.map((obj) => (
+          <Circle
+            key={obj.id}
+            id={obj.id}
+            x={translate(obj).x}
+            y={translate(obj).y}
+            radius={6 - obj.mag}
+            fill={"white"}
+          />
+        ))}
         {stars.map((star) => (
           <Star
             key={star.id}
