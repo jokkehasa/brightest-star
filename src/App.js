@@ -3,7 +3,18 @@ import { useState, useEffect } from 'react';
 import GetBrightest from './components/GetBrightest';
 import SkyDirections from './components/SkyDirections';
 import SkyView from './components/SkyView';
-import rawData from './hygdata_v3_brightest.json';
+import hygData from './hygdata_simplified.json';
+
+function calculateHorizontal(stars) {
+  return stars.map(({ id, ra, dec, mag }) => (
+    {
+      id: id,
+      az: ra * 15,  // COORDINATE TRANSFORMATION NOT YET IMPLEMENTED
+      alt: dec,     // !!!
+      mag: mag,
+    }
+  ));
+}
 
 function App() {
   const [location, setLocation] = useState(null);
@@ -15,10 +26,11 @@ function App() {
     E: false,
     Z: false
   });
-  const [starData, setStarData] = useState();
+  const [starData, setStarData] = useState(hygData);
+//  console.log(hygData.slice(0, 5));
 
   useEffect(() => {
-    setStarData(rawData.results);
+    setStarData(hygData.results);
   }, [])
 
   const updateCoordinates = () => {
@@ -40,7 +52,7 @@ function App() {
 
   useEffect(() => {
     console.log(direction);
-  
+
   }, [direction])
 
   return (
@@ -93,7 +105,7 @@ function App() {
         })}
       </Box>
       <SkyDirections handleClick={toggleDirection} />
-      <SkyView />
+      <SkyView stars={calculateHorizontal(hygData)} />
     </Container >
   );
 }

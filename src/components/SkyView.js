@@ -39,12 +39,14 @@ const CameraControls = () => {
             target={[ 0, 1.5, 0 ]} />;
 };
 
-function SkyView() {
-  const [stars, setStars] = useState(generateStars());
+function SkyView(props) {
+//  const [stars, setStars] = useState(generateStars());
   const [direction, setDirection] = useState({
     az: 0,
     alt: 0,
   });
+
+//  console.log(props.stars.slice(0, 5));
 
   return (
     <Canvas style={{width: 1000, height: 600, background: "black"}} camera={{ far: distanceToStars+100, position: [ 0, 1.7, 3 ] }}>
@@ -82,7 +84,7 @@ function SkyView() {
           color={0x442211}
         />
       </mesh>
-      {stars.map(({ id, alt, az, mag }) => (
+      {props.stars.map(({ id, alt, az, mag }) => (
         <mesh
           key={id}
           position={new Vector3().setFromSphericalCoords(
