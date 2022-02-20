@@ -1,7 +1,12 @@
-import { useState } from 'react';
-import { Stage, Layer, Star, Text, Circle, Rect } from 'react-konva';
+import { useState, useRef } from 'react';
+import { Canvas, extend, useFrame, useThree } from '@react-three/fiber';
+import { Vector3, MathUtils, BackSide } from 'three';
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-function generateObjects() {
+// Extend will make OrbitControls available as a JSX element called orbitControls for us to use.
+extend({ OrbitControls });
+
+function generateStars() {
   const coords = Array(12*9);
   for (var i = 0; i<9; i++)
     for (var j = 0; j<12; j++)
@@ -14,112 +19,107 @@ function generateObjects() {
   return coords;
 }
 
-function generateShapes() {
-  return [...Array(10)].map((_, i) => ({
-    id: i.toString(),
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    rotation: Math.random() * 180,
-    isDragging: false,
-  }));
-}
+const distanceToStars = 1000;
+
+const CameraControls = () => {
+  // Get a reference to the Three.js Camera, and the canvas html element.
+  // We need these to setup the OrbitControls component.
+  // https://threejs.org/docs/#examples/en/controls/OrbitControls
+  const {
+    camera,
+    gl: { domElement },
+  } = useThree();
+  // Ref to the controls, so that we can update them on every frame using useFrame
+  const controls = useRef();
+  useFrame((state) => controls.current.update());
+  return <orbitControls
+            ref={controls}
+            args={[camera, domElement]}
+            enableZoom={false}
+            target={[ 0, 1.5, 0 ]} />;
+};
 
 function SkyView() {
-  const [stars, setStars] = useState(generateShapes());
-  const [objects, setObjects] = useState(generateObjects());
+  const [stars, setStars] = useState(generateStars());
   const [direction, setDirection] = useState({
     az: 0,
     alt: 0,
   });
 
-  const deg = (rad) => Math.PI / 180 * rad;
-  const D = 700;  /* Screen distance in pix */
-
-  const translate = (obj) => {
-   /* No rotation yet (z -> viewing direction)*/
-      const phi = obj.az;
-      const theta = 90 - obj.alt;
-   /* Projection */
-      const r = D * Math.tan(deg(theta));
-      const r1 = r * Math.cos(deg(theta));
-      const xi = r1 * Math.cos(Math.PI / 180 * phi);
-      const upsilon = r1 * Math.sin(Math.PI / 180 * phi);
-   /* Translate to screen coordinates and return */
-    return ({
-      x: xi + window.innerWidth / 2,
-      y: -upsilon + window.innerHeight / 2,
-    });
-  }
-
-  const handleDragStart = (e) => {
-    const id = e.target.id();
-    setStars(
-      stars.map((star) => {
-        return {
-          ...star,
-          isDragging: star.id === id,
-        };
-      })
-    );
-  };
-  const handleDragEnd = (e) => {
-    setStars(
-      stars.map((star) => {
-        return {
-          ...star,
-          isDragging: false,
-        };
-      })
-    );
-  };
-
   return (
-    <Stage width={window.innerWidth} height={window.innerHeight}>
-      <Layer>
-      <Rect
-        x={0}
-        y={0}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        fill={"black"}
-      />
-        <Text text="Try to drag a star" />
-        {objects.map((obj) => (
-          <Circle
-            key={obj.id}
-            id={obj.id}
-            x={translate(obj).x}
-            y={translate(obj).y}
-            radius={6 - obj.mag}
-            fill={"white"}
+    <Canvas style={{width: 1000, height: 600, background: "black"}} camera={{ far: distanceToStars+100, position: [ 0, 1.7, 3 ] }}>
+      <CameraControls />
+      <mesh>
+        <boxBufferGeometry
+          attach="geometry"
+          args={[1.5, 1.5, 1.5]} />
+        <meshStandardMaterial
+          attach="material"
+          color={0xf95b3c}
+          emissive={0x151005}
+          metalness={0.7}
+          roughness={0.8} />
+      </mesh>
+      <mesh>
+        <sphereBufferGeometry
+          attach="geometry"
+          args={[ distanceToStars+10, 100, 50 ]}
+        />
+        <meshBasicMaterial
+          attach="material"
+          color={0x100030}
+//          emissive=
+          side={BackSide}
+        />
+      </mesh>
+      <mesh rotation={[ -Math.PI/2, 0, 0 ]}>
+        <circleBufferGeometry
+          attach="geometry"
+          args={[ distanceToStars+10, 100 ]}
+        />
+        <meshStandardMaterial
+          attach="material"
+          color={0x442211}
+        />
+      </mesh>
+      {stars.map(({ id, alt, az, mag }) => (
+        <mesh
+          key={id}
+          position={new Vector3().setFromSphericalCoords(
+            distanceToStars,
+            MathUtils.degToRad(90-alt),
+            MathUtils.degToRad(az)
+          )}
+        >
+          <sphereBufferGeometry
+            attach="geometry"
+            args={[ 7-mag, 4, 2 ]}
           />
-        ))}
-        {stars.map((star) => (
-          <Star
-            key={star.id}
-            id={star.id}
-            x={star.x}
-            y={star.y}
-            numPoints={5}
-            innerRadius={20}
-            outerRadius={40}
-            fill="#89b717"
-            opacity={0.8}
-            draggable
-            rotation={star.rotation}
-            shadowColor="black"
-            shadowBlur={10}
-            shadowOpacity={0.6}
-            shadowOffsetX={star.isDragging ? 10 : 5}
-            shadowOffsetY={star.isDragging ? 10 : 5}
-            scaleX={star.isDragging ? 1.2 : 1}
-            scaleY={star.isDragging ? 1.2 : 1}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+          <meshBasicMaterial
+            attach="material"
+            color="white"
           />
-        ))}
-      </Layer>
-    </Stage>
+        </mesh>
+      ))}
+      <group position={new Vector3().setFromSphericalCoords(
+              distanceToStars/2,
+              MathUtils.degToRad(40),
+              MathUtils.degToRad(95)
+            )}
+      >
+        <mesh>
+          <sphereBufferGeometry
+            attach="geometry"
+            args={[ 20, 40, 20 ]}
+          />
+          <meshBasicMaterial
+            attach="material"
+            color="white"
+          />
+        </mesh>
+        <pointLight intensity={1.0} />
+      </group>
+    </Canvas>
   );
 }
 
