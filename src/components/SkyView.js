@@ -84,7 +84,9 @@ function SkyView(props) {
           color={0x442211}
         />
       </mesh>
-      {props.stars.map(({ id, alt, az, mag }) => (
+      {props.stars.filter(({ alt, mag } ) => (
+        alt > 0 & mag <= 5
+      )).map(({ id, alt, az, mag }) => (
         <mesh
           key={id}
           position={new Vector3().setFromSphericalCoords(
