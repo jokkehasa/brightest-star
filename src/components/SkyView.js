@@ -49,7 +49,18 @@ function SkyView(props) {
 //  console.log(props.stars.slice(0, 5));
 
   return (
-    <Canvas style={{width: 1000, height: 600, background: "black"}} camera={{ far: distanceToStars+100, position: [ 0, 1.7, 3 ] }}>
+    <Canvas
+      style={{
+        width: 1000,
+        height: 600,
+        background: "black",
+      }}
+      camera={{
+        far: distanceToStars+100,
+        position: [ 0, 1.7, 3 ],
+        aspect: 5/3,  // TODO: determine from canvas width and height
+        fov: 80,  // vertical field of view in degrees
+      }}>
       <CameraControls />
       <mesh>
         <boxBufferGeometry
