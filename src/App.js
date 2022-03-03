@@ -1,4 +1,4 @@
-import { Box, Button, Container, Paper, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
+import { Box, Button, Container, Paper, Slider, Table, TableBody, TableCell, TableContainer, TableRow, Typography } from '@mui/material';
 import { useState, useEffect } from 'react';
 import GetBrightest from './components/GetBrightest';
 import SkyDirections from './components/SkyDirections';
@@ -17,6 +17,7 @@ function calculateHorizontal(stars) {
 }
 
 function App() {
+
   const [location, setLocation] = useState(null);
   const [time, setTime] = useState(null);
   const [direction, setDirection] = useState({
@@ -27,11 +28,13 @@ function App() {
     Z: false
   });
   const [starData, setStarData] = useState(hygData);
-//  console.log(hygData.slice(0, 5));
 
-  useEffect(() => {
-    setStarData(hygData.results);
-  }, [])
+  const [visibility, setVisibility] = useState(40);
+
+  const handleVisibilityChange = (event, newValue) => {
+    setVisibility(newValue);
+    console.log(visibility)
+  }
 
   const updateCoordinates = () => {
     if (navigator.geolocation) {
@@ -100,12 +103,18 @@ function App() {
                 {dir}
               </Typography>
             </Paper>
-
           )
         })}
       </Box>
       <SkyDirections handleClick={toggleDirection} />
-      <SkyView stars={calculateHorizontal(hygData)} />
+      <Typography>Visibility</Typography>
+      <Slider
+        value={visibility}
+        step={1}
+        min={-10}
+        max={60}
+        onChange={handleVisibilityChange} />
+      <SkyView stars={calculateHorizontal(starData)} visibility={visibility} />
     </Container >
   );
 }

@@ -85,7 +85,7 @@ function SkyView(props) {
         />
       </mesh>
       {props.stars.filter(({ alt, mag } ) => (
-        alt > 0 & mag <= 5
+        alt > 0 & mag <= (props.visibility/10)
       )).map(({ id, alt, az, mag }) => (
         <mesh
           key={id}
