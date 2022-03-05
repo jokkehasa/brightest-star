@@ -5,15 +5,36 @@ import SkyDirections from './components/SkyDirections';
 import SkyView from './components/SkyView';
 import hygData from './hygdata_simplified.json';
 
-function calculateHorizontal(stars) {
-  return stars.map(({ id, ra, dec, mag }) => (
-    {
+function dsin(angleInDeg) {
+  return Math.sin(angleInDeg * Math.PI / 180);
+}
+function dcos(angleInDeg) {
+  return Math.cos(angleInDeg * Math.PI / 180);
+}
+
+function calculateHorizontal(stars, loc, t) {
+  /*  H = t - α
+    sin(a) = sin(δ) sin(φ) + cos(δ) cos(φ) cos(H)
+    sin(A) = - sin(H) cos(δ) / cos(a)
+    cos(A) = { sin(δ) - sin(φ) sin(a) } / { cos(φ) cos(a) } */
+  const lst = t;  // LST NOT YET IMPLEMENTED!!
+  const lat = loc.coords.latitude;
+  return stars.map(({ id, ra, dec, mag }) => {
+    // sine of local hour angle
+    const sinH = Math.sin((lst - ra) * Math.PI / 12);
+    // cosine of local hour angle
+    const cosH = Math.cos((lst - ra) * Math.PI / 12);
+    // sine of altitude
+    const sinAlt = dsin(dec) * dsin(lat) + dcos(dec) * dcos(lat) * cosH;
+    // sine of azimuth
+    const sinAz = -sinH * dcos(dec) / Math.sqrt(1 - sinAlt**2);
+    return ({
       id: id,
-      az: ra * 15,  // COORDINATE TRANSFORMATION NOT YET IMPLEMENTED
-      alt: dec,     // !!!
+      az: Math.asin(sinAz) / Math.PI * 180,
+      alt: Math.asin(sinAlt) / Math.PI * 180,
       mag: mag,
-    }
-  ));
+    });
+  });
 }
 
 function App() {
@@ -52,6 +73,10 @@ function App() {
       : tempBool = true
     setDirection({ ...direction, [toggled]: tempBool })
   };
+
+  useEffect(() => {
+    updateCoordinates();
+  }, [])
 
   useEffect(() => {
     console.log(direction);
@@ -114,7 +139,12 @@ function App() {
         min={-10}
         max={60}
         onChange={handleVisibilityChange} />
-      <SkyView stars={calculateHorizontal(starData)} visibility={visibility} />
+      <SkyView
+        stars={location
+          ? calculateHorizontal(starData, location, time.getHours())
+          : []
+        }
+        visibility={visibility} />
     </Container >
   );
 }
