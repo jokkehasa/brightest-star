@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import GetBrightest from './components/GetBrightest';
 import SkyDirections from './components/SkyDirections';
 import SkyView from './components/SkyView';
+import ChangeDateTime from './components/ChangeDateTime';
 import hygData from './hygdata_simplified.json';
 
 function dsin(angleInDeg) {
@@ -99,6 +100,10 @@ function App() {
             <TableRow>
               <TableCell>Time: </TableCell>
               <TableCell>{time && time.toString()}</TableCell>
+            </TableRow>
+            <TableRow>
+              <TableCell>Time: </TableCell>
+              <TableCell>{<ChangeDateTime time={time} setTime={setTime}/>}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
