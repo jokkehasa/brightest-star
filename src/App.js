@@ -145,10 +145,13 @@ function App() {
         max={60}
         onChange={handleVisibilityChange} />
       <SkyView
-        stars={location
+      /*  stars={location
           ? calculateHorizontal(starData, location, time.getHours())
           : []
-        }
+        }*/
+        stars={starData}
+        latitude={location ? location.coords.latitude : 90}
+        lst={time ? time.getHours() + time.getMinutes()/60 : 0}  // TODO: Get the actual LST
         visibility={visibility} />
     </Container >
   );

@@ -19,7 +19,7 @@ function generateStars() {
   return coords;
 }
 
-const distanceToStars = 1000;
+const distanceToStars = 700;
 
 const CameraControls = () => {
   // Get a reference to the Three.js Camera, and the canvas html element.
@@ -41,10 +41,10 @@ const CameraControls = () => {
 
 function SkyView(props) {
 //  const [stars, setStars] = useState(generateStars());
-  const [direction, setDirection] = useState({
+/*  const [direction, setDirection] = useState({
     az: 0,
     alt: 0,
-  });
+  });*/
 
 //  console.log(props.stars.slice(0, 5));
 
@@ -62,7 +62,7 @@ function SkyView(props) {
         fov: 80,  // vertical field of view in degrees
       }}>
       <CameraControls />
-      <mesh>
+      <mesh name="rustycube">
         <boxBufferGeometry
           attach="geometry"
           args={[1.5, 1.5, 1.5]} />
@@ -73,19 +73,43 @@ function SkyView(props) {
           metalness={0.7}
           roughness={0.8} />
       </mesh>
-      <mesh>
+      <mesh name="firmament"
+        rotation-y={MathUtils.degToRad(15*props.lst)}
+        rotation-x={MathUtils.degToRad(90-props.latitude)}
+      >
         <sphereBufferGeometry
           attach="geometry"
-          args={[ distanceToStars+10, 100, 50 ]}
+          args={[ distanceToStars, 100, 50 ]}
         />
         <meshBasicMaterial
           attach="material"
           color={0x100030}
-//          emissive=
           side={BackSide}
         />
+        {props.stars.filter(({ dec, mag } ) => (
+          dec > 0 & mag <= (props.visibility/10)
+        )).map(({ id, dec, ra, mag }) => (
+          <mesh
+            key={id}
+            position={new Vector3().setFromSphericalCoords(
+              distanceToStars,
+              MathUtils.degToRad(90-dec),
+              MathUtils.degToRad(15*ra)
+            )}
+          >
+            <sphereBufferGeometry
+              attach="geometry"
+              args={[ 7-mag, 4, 2 ]}
+            />
+            <meshBasicMaterial
+              attach="material"
+              color="white"
+            />
+          </mesh>
+        ))}
       </mesh>
-      <mesh rotation={[ -Math.PI/2, 0, 0 ]}>
+      <mesh name="ground"
+        rotation={[ -Math.PI/2, 0, 0 ]}>
         <circleBufferGeometry
           attach="geometry"
           args={[ distanceToStars+10, 100 ]}
@@ -95,34 +119,13 @@ function SkyView(props) {
           color={0x442211}
         />
       </mesh>
-      {props.stars.filter(({ alt, mag } ) => (
-        alt > 0 & mag <= (props.visibility/10)
-      )).map(({ id, alt, az, mag }) => (
-        <mesh
-          key={id}
-          position={new Vector3().setFromSphericalCoords(
-            distanceToStars,
-            MathUtils.degToRad(90-alt),
-            MathUtils.degToRad(az)
-          )}
-        >
-          <sphereBufferGeometry
-            attach="geometry"
-            args={[ 7-mag, 4, 2 ]}
-          />
-          <meshBasicMaterial
-            attach="material"
-            color="white"
-          />
-        </mesh>
-      ))}
       <group position={new Vector3().setFromSphericalCoords(
               distanceToStars/2,
               MathUtils.degToRad(40),
               MathUtils.degToRad(95)
             )}
       >
-        <mesh>
+        <mesh name="moon">
           <sphereBufferGeometry
             attach="geometry"
             args={[ 20, 40, 20 ]}
