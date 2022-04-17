@@ -5,6 +5,7 @@ import SkyDirections from './components/SkyDirections';
 import SkyView from './components/SkyView';
 import ChangeDateTime from './components/ChangeDateTime';
 import hygData from './hygdata_simplified.json';
+import PlanetData from './components/PlanetData';
 
 function dsin(angleInDeg) {
   return Math.sin(angleInDeg * Math.PI / 180);
@@ -153,6 +154,7 @@ function App() {
         latitude={location ? location.coords.latitude : 90}
         lst={time ? time.getHours() + time.getMinutes()/60 : 0}  // TODO: Get the actual LST
         visibility={visibility} />
+        <PlanetData/>
     </Container >
   );
 }
