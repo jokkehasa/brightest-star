@@ -29,7 +29,7 @@ function calculateHorizontal(stars, loc, t) {
     // sine of altitude
     const sinAlt = dsin(dec) * dsin(lat) + dcos(dec) * dcos(lat) * cosH;
     // sine of azimuth
-    const sinAz = -sinH * dcos(dec) / Math.sqrt(1 - sinAlt**2);
+    const sinAz = -sinH * dcos(dec) / Math.sqrt(1 - sinAlt ** 2);
     return ({
       id: id,
       az: Math.asin(sinAz) / Math.PI * 180,
@@ -51,6 +51,45 @@ function App() {
     Z: false
   });
   const [starData, setStarData] = useState(hygData);
+
+  const [planetData, setPlanetData] = useState({
+    mars: {
+      version: "",
+      ra: "",
+      dec: "",
+      mag: "",
+    },
+    venus: {
+      version: "",
+      ra: "",
+      dec: "",
+      mag: "",
+    },
+    mercury: {
+      version: "",
+      ra: "",
+      dec: "",
+      mag: "",
+    },
+    jupiter: {
+      version: "",
+      ra: "",
+      dec: "",
+      mag: "",
+    },
+    saturn: {
+      version: "",
+      ra: "",
+      dec: "",
+      mag: "",
+    },
+    error: "no errors"
+  });
+
+  const updatePlanetData = (newPlanetData) => {
+    setPlanetData({ ...newPlanetData });
+    console.log("success");
+  }
 
   const [visibility, setVisibility] = useState(40);
 
@@ -104,7 +143,7 @@ function App() {
             </TableRow>
             <TableRow>
               <TableCell>Time: </TableCell>
-              <TableCell>{<ChangeDateTime time={time} setTime={setTime}/>}</TableCell>
+              <TableCell>{<ChangeDateTime time={time} setTime={setTime} />}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -146,15 +185,16 @@ function App() {
         max={60}
         onChange={handleVisibilityChange} />
       <SkyView
-      /*  stars={location
-          ? calculateHorizontal(starData, location, time.getHours())
-          : []
-        }*/
+        /*  stars={location
+            ? calculateHorizontal(starData, location, time.getHours())
+            : []
+          }*/
         stars={starData}
+        planets={planetData}
         latitude={location ? location.coords.latitude : 90}
-        lst={time ? time.getHours() + time.getMinutes()/60 : 0}  // TODO: Get the actual LST
+        lst={time ? time.getHours() + time.getMinutes() / 60 : 0}  // TODO: Get the actual LST
         visibility={visibility} />
-        <PlanetData/>
+      <PlanetData updatePlanetData={updatePlanetData} time={time} />
     </Container >
   );
 }
